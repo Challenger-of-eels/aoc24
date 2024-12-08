@@ -45,3 +45,19 @@ pub fn print_map<T:Copy + std::hash::Hash + Eq>(cells:&Vec<Vec<T>>, chars:HashMa
         println!();
     }
 }
+
+
+pub fn iterate_all_pairs<'a: 'c, 'b: 'c, 'c, T>(
+    xs: &'a [T],
+    ys: &'b [T],
+) -> impl Iterator<Item = (&'a T, &'b T)> + 'c {
+    xs.iter().flat_map(move |x| std::iter::repeat(x).zip(ys))
+}
+
+
+pub fn iterate_all_unique_pairs<'a: 'c, 'b: 'c, 'c, T>(
+    xs: &'a [T],
+    ys: &'b [T],
+) -> impl Iterator<Item = (&'a T, &'b T)> + 'c where T:PartialEq {
+    return xs.iter().flat_map(move |x| std::iter::repeat(x).zip(ys)).filter(|(a, b)| *a != *b);
+}
