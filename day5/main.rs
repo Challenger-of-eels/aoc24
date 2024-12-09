@@ -61,7 +61,7 @@ fn p1(input:&ParseResult) {
     let rules = build_rules_map(&input.rules);
     for update in &input.updates {
         if update_is_valid(update, &rules) {
-            result += update[update.len() / 2   ];
+            result += update[update.len() / 2];
         }
     }
     dbg!(result);
@@ -70,7 +70,6 @@ fn p1(input:&ParseResult) {
 fn p2(input:&ParseResult) {
     let mut result:i32 = 0;
     let rules = build_rules_map(&input.rules);
-
 
     fn compare(rules:&HashMap<i32,HashSet<i32>>, a:&i32, b:&i32)->Ordering {
         if let Some(hash) = rules.get(a) {
@@ -90,7 +89,7 @@ fn p2(input:&ParseResult) {
     for update in &input.updates {
         if !update_is_valid(update, &rules) {
             let fixed_update = fix_update(&rules, update.to_vec());
-            result += fixed_update[fixed_update.len() / 2   ];
+            result += fixed_update[fixed_update.len() / 2];
         }
     }
     dbg!(result);
@@ -102,8 +101,6 @@ fn parse(file:&Path)->Result<ParseResult,anyhow::Error> {
         rules: Vec::<(i32, i32)>::new(),
         updates: Vec::<Vec<i32>>::new(),
     };
-
-
 
     let mut rules = true;
     for l in lines {

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, fs::File, io::{BufReader, Lines}, path::Path, time::Instant};
+use std::{collections::HashMap, fs::File, io::{BufRead, BufReader, Lines}, path::Path, time::Instant};
 
 pub fn measure<T>(p:fn(input:&T), input:&T) {
     let now = Instant::now();
@@ -7,6 +7,19 @@ pub fn measure<T>(p:fn(input:&T), input:&T) {
     println!("Elapsed {}s", t);
 }
 
+
+
+pub fn get_input_lines(invoker_path:&str) -> impl Iterator<Item = String> {
+    let file = Path::new(invoker_path).join("../input.txt");
+    let lines = BufReader::new(File::open(file).unwrap()).lines();
+    return lines.map(|s| s.unwrap());
+}
+
+pub fn get_test_input_lines(invoker_path:&str) -> impl Iterator<Item = String> {
+    let file = Path::new("../").join(invoker_path).join("../input.test.txt");
+    let lines = BufReader::new(File::open(file).unwrap()).lines();
+    return lines.map(|s| s.unwrap());
+}
 
 pub fn get_input<T>(parser:fn(file:&Path)->Result<T,anyhow::Error>, invoker_path:&str)->T {
     let file = Path::new(invoker_path).join("../input.txt");

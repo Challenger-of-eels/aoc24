@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::{HashMap, HashSet}, fs::File, io::{BufRead
 use common;
 
 pub fn main() {
-    let input:ParseResult = common::get_input(parse, file!());
+    let input:ParseResult = parse(common::get_input_lines(file!()));
     
     common::measure(p1, &input);
     common::measure(p2, &input);
@@ -14,12 +14,12 @@ mod tests {
 
     #[test]
     fn test_input_p1() {
-        p1(&common::get_test_input(parse, file!()));
+        p1(&parse(common::get_test_input_lines( file!())));
     }
 
     #[test]
     fn test_input_p2() {
-        p2(&common::get_test_input(parse, file!()));
+        p2(&parse(common::get_test_input_lines(file!())));
     }
 }
 
@@ -70,12 +70,9 @@ fn p2(input:&ParseResult) {
     dbg!(result);
 }
 
-fn parse(file:&Path)->Result<ParseResult,anyhow::Error> {
-    let lines = BufReader::new(File::open(file)?).lines();
+fn parse<T>(lines:T)->ParseResult where T: Iterator<Item = String> {
     let mut result = Vec::new();
-
-    for l in lines {
-        let line = l.unwrap();
+    for line in lines {
         let (result_str, tail_str) = line.split_once(": ").unwrap();
         let task = Task {
             result: result_str.parse::<i64>().unwrap(),
@@ -83,5 +80,5 @@ fn parse(file:&Path)->Result<ParseResult,anyhow::Error> {
         };
         result.push(task);
     }
-    Ok(result)
+    return result;
 }

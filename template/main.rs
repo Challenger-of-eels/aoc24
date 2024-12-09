@@ -2,25 +2,19 @@ use std::{cell::RefCell, collections::{HashMap, HashSet}, fs::File, io::{BufRead
 use common;
 
 pub fn main() {
-    let input:ParseResult = common::get_input(parse, file!());
-    
+    let input:ParseResult = parse(&mut common::get_input_lines(file!()));
     common::measure(p1, &input);
     common::measure(p2, &input);
 }
 
-#[cfg(test)]
-mod tests {
-    use super::*;
+#[test]
+fn test_input_p1() {
+    p1(&parse(&mut common::get_test_input_lines(file!())));
+}
 
-    #[test]
-    fn test_input_p1() {
-        p1(&common::get_test_input(parse, file!()));
-    }
-
-    #[test]
-    fn test_input_p2() {
-        p2(&common::get_test_input(parse, file!()));
-    }
+#[test]
+fn test_input_p2() {
+    p2(&parse(&mut common::get_test_input_lines(file!())));
 }
 
 //#[derive(Debug, Clone, Copy, Eq, PartialEq)]
@@ -37,10 +31,8 @@ fn p2(input:&ParseResult) {
     // dbg!(result);
 }
 
-fn parse(file:&Path)->Result<ParseResult,anyhow::Error> {
-    let lines = BufReader::new(File::open(file)?).lines();
+fn parse<T>(lines:&mut T)->ParseResult where T: Iterator<Item = String> {
     let mut result = 0_i64;
-
     for l in lines {
         let line = l.unwrap();
     }
