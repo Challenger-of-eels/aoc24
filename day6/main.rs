@@ -1,5 +1,5 @@
 use std::{cell::RefCell, collections::{HashMap, HashSet}, fs::File, io::{BufRead, BufReader, Lines}, ops::Index, path::Path};
-use common;
+use common::{self, discrete2d::{Direction, Map2d, V2}};
 
 pub fn main() {
     let input:ParseResult = common::get_input(parse, file!());
@@ -23,135 +23,13 @@ mod tests {
     }
 }
 
-type ParseResult = Map<Cell>;
-
-#[derive(Debug, Clone, Copy, Eq, PartialEq)]
-struct V2 {
-    x:i32,
-    y:i32,
-}
-
-impl V2 {
-    fn new() -> V2 {
-        return V2 { x:0, y:0 };
-    }
-
-    fn to_usize(&self) -> (usize, usize) {
-        return (self.x as usize, self.y as usize);
-    }
-
-    fn to_i32(&self) -> (i32, i32) {
-        return (self.x, self.y);
-    }
-
-    fn from_usize(coords:(usize, usize)) -> V2 {
-        return V2 { x:coords.0 as i32, y:coords.1 as i32 };
-    }
-
-    fn from_i32(coords:(i32, i32)) -> V2 {
-        return V2 { x:coords.0, y:coords.1 };
-    }
-
-    fn equal_xy(&mut self, check:(i32, i32)) {
-        return self.x == chech.x && self.y == check.y;
-    }
-
-    fn add_xy(&mut self, addition:(i32, i32)) {
-        self.x += addition.0;
-        self.y += addition.1;
-    }
-
-
-    fn add(&mut self, v:V2) {
-        self.x += v.x;
-        self.y += v.y;
-    }
-
-    fn step_in_direction(&mut self, direction:&Direction, step:i32) {
-        match direction {
-            Direction::Right => self.x += step,
-            Direction::Left => self.x -= step,
-            Direction::Down => self.y += step,
-            Direction::Up => self.y -= step,
-        }
-    }
-}
-
-#[derive(Debug)]
-struct Map<T> {
-    cells:Vec<Vec<T>>,
-}
-
-impl<T:Eq> Map<T> {
-    fn width(&self) -> usize {
-        return self.cells[0].len();
-    }
-
-    fn height(&self) -> usize {
-        return self.cells.len();
-    }
-
-    fn contains(&self, pos:V2) -> bool {
-        return pos.x >= 0 && pos.x < self.width() as i32 && pos.y >= 0 && pos.y < self.height() as i32;
-    }
-
-    fn get(&self, pos:V2) -> &T {
-        return self.get_int_xy(pos.x, pos.y);
-    }
-
-    fn get_int_xy(&self, x:i32, y:i32) -> &T {
-        return self.get_xy(x as usize, y as usize);
-    }
-
-    fn get_xy(&self, x:usize, y:usize) -> &T {
-        return &self.cells[y][x];
-    }
-
-    fn find(&self, target:T) -> Option<(usize,usize)> {
-        for y in 0..self.cells.len() {
-            for x in 0..self.width() {
-                if self.cells[y][x] == target {
-                    return Some((x, y));
-                }
-            }
-        }
-        return None;
-    }
-}
+type ParseResult = Map2d<Cell>;
 
 #[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
 enum Cell {
     Empty,
     Wall,
     Start,
-}
-
-#[derive(Debug, Clone, Copy, Eq, PartialEq, Hash)]
-enum Direction {
-    Up,
-    Down,
-    Left,
-    Right,
-}
-
-impl Direction {
-    fn rotate_cw(&self) -> Direction {
-        return match &self {
-            Direction::Up => Direction::Right,
-            Direction::Right => Direction::Down,
-            Direction::Down => Direction::Left,
-            Direction::Left => Direction::Up,
-        }
-    }
-
-    fn get_step(&self) -> (i32, i32) {
-        return match &self {
-            Direction::Right => (1, 0),
-            Direction::Left => (-1, 0),
-            Direction::Down => (0, 1),
-            Direction::Up => (0, -1),
-        }
-    }
 }
 
 fn p1(input:&ParseResult) {
@@ -177,8 +55,6 @@ fn p1(input:&ParseResult) {
         visited.insert((pos.x, pos.y));
     }
 
-
-    let mut result:i64 = 0;
     dbg!(visited.len());
 
     // let chars = HashMap::from([
@@ -204,7 +80,7 @@ fn p2(input:&ParseResult) {
     let mut direction = Direction::Up;
     visited.insert((pos.x, pos.y, direction));
 
-    fn is_loop(mut pos:V2, mut direction:Direction, early_visited:&HashSet<(i32, i32, Direction)>, map:&Map<Cell>, block:&(i32, i32)) -> bool {
+    fn is_loop(mut pos:V2, mut direction:Direction, early_visited:&HashSet<(i32, i32, Direction)>, map:&Map2d<Cell>, block:&(i32, i32)) -> bool {
         let mut visited:HashSet<(i32, i32, Direction)> = HashSet::new();
         visited.insert((pos.x, pos.y, direction));
         let mut step = 0;
@@ -256,13 +132,21 @@ fn p2(input:&ParseResult) {
 
 fn parse(file:&Path)->Result<ParseResult,anyhow::Error> {
     let lines = BufReader::new(File::open(file)?).lines().into_iter();
-
-    let map:Map<Cell> = Map::<Cell> {
-        cells: common::parse_map(lines, HashMap::from([
-            ('.', Cell::Empty),
-            ('#', Cell::Wall),
-            ('^', Cell::Start),
-        ]))
+    
+    let map: Map2d<Cell> = Map2d::<Cell> {
+        cells: common::parse_map(lines.map(|s| s.unwrap()), |c| match c {
+            '.' => Cell::Empty,
+            '#' => Cell::Wall,
+            '^' => Cell::Start,
+            _ => panic!("Not expected character")
+        }
+            
+            // HashMap::from([
+            // ('.', Cell::Empty),
+            // ('#', Cell::Wall),
+            // ('^', Cell::Start),
+        // ])
+        )
     };
     Ok(map)
 }
